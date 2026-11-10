@@ -60,8 +60,11 @@ def _sql_int_list(values):
 
 
 def build_surface_query(
-    year, secids=tuple(SECIDS.values()), maturities=tuple(MATURITIES_DAYS),
-    start_date=SURFACE_START_DATE, end_date=SURFACE_END_DATE,
+    year,
+    secids=tuple(SECIDS.values()),
+    maturities=tuple(MATURITIES_DAYS),
+    start_date=SURFACE_START_DATE,
+    end_date=SURFACE_END_DATE,
 ):
     """SQL for one year of the volatility surface.
 
@@ -78,14 +81,18 @@ def build_surface_query(
         SELECT secid, date, days, cp_flag, delta,
                impl_volatility, impl_strike, dispersion
         FROM {OPTIONM_LIB}.vsurfd{year}
-        WHERE TODO
+        WHERE secid IN ({_sql_int_list(secids)})
+            AND days IN ({_sql_int_list(maturities)})
+            AND date BETWEEN '{start_date}' AND '{end_date}'
     """
     ## TODO: Replace `WHERE TODO` above with the three conditions the docstring
     ## describes. `build_price_query`, below, shows two of them on another table.
     ## Check your work, offline, with `pytest ./src/test_pull_optionmetrics.py`.
 
 
-def build_price_query(year, secids=tuple(SECIDS.values()), start_date=SURFACE_START_DATE, end_date=SURFACE_END_DATE):
+def build_price_query(
+    year, secids=tuple(SECIDS.values()), start_date=SURFACE_START_DATE, end_date=SURFACE_END_DATE
+):
     """SQL for one year of daily closing prices."""
     return f"""
         SELECT secid, date, close
@@ -123,7 +130,10 @@ def pull_vol_surface(start_date=SURFACE_START_DATE, end_date=SURFACE_END_DATE, d
     try:
         for year in _years(start_date, end_date):
             try:
-                df = db.raw_sql(build_surface_query(year, start_date=start_date, end_date=end_date), date_cols=["date"])
+                df = db.raw_sql(
+                    build_surface_query(year, start_date=start_date, end_date=end_date),
+                    date_cols=["date"],
+                )
             except Exception as error:  # a year's table may not exist yet
                 print(f"[pull_vol_surface] {year}: skipped ({str(error).splitlines()[0][:80]})")
                 continue
@@ -146,7 +156,10 @@ def pull_security_prices(start_date=SURFACE_START_DATE, end_date=SURFACE_END_DAT
     try:
         for year in _years(start_date, end_date):
             try:
-                df = db.raw_sql(build_price_query(year, start_date=start_date, end_date=end_date), date_cols=["date"])
+                df = db.raw_sql(
+                    build_price_query(year, start_date=start_date, end_date=end_date),
+                    date_cols=["date"],
+                )
             except Exception as error:
                 print(f"[pull_security_prices] {year}: skipped ({str(error).splitlines()[0][:80]})")
                 continue

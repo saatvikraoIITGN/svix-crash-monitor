@@ -23,9 +23,10 @@ description = "From settlement prices to the simple variance swap rate, the risk
 path = "_output/02_svix_and_crash_probability_ipynb.ipynb"
 
 
-# TODO: Register the monitor notebook, `03_daily_monitor_ipynb`, following
-# the two entries above: a name, a description, and the path of the executed
-# notebook that `doit` leaves in `_output/`.
+[notebooks.03_daily_monitor_ipynb]
+name = "The Daily Monitor"
+description = "How the daily update works: pull the latest E-mini session, append its SVIX and crash-probability row to the history, rebuild the page, and publish it to GitHub Pages from a scheduled GitHub Actions workflow."
+path = "_output/03_daily_monitor_ipynb.ipynb"
 
 
 [notebooks.04_single_name_crash_bounds_ipynb]
@@ -53,13 +54,25 @@ window in the settings again when it changes; `doit latest` pulls the most
 recent session."""
 
 
-# TODO: Register the monitor's history as `[dataframes.svix_monitor_history]`,
-# following the entry above. It is the CSV in `_output/` that
-# `src/monitor.py` writes, and that the deploy workflow keeps on the
-# `monitor-history` branch. Document it: a name, a description, the path,
-# which column holds the date (`date_col`), how it is produced, and what a
-# reader needs to know (`docs`). The chart below refers to this entry by
-# name, so the site does not build until it exists.
+[dataframes.svix_monitor_history]
+name = "SVIX Monitor History"
+description = "One row per session: the 30-day SVIX next to the VIX, and the risk-neutral, log-utility, and power-utility probabilities of a 10% and 20% drop in the S&P 500, from E-mini option settlements"
+path = "_output/svix_monitor_history.csv"
+date_col = "date"
+tags = ["Options", "Volatility", "Monitor"]
+pull_method = "Computed by src/monitor.py from the Databento settlements and FRED; appended daily by `doit latest` in the deploy workflow"
+docs = """One row per CME session, oldest first. Columns: `date`; `near_expiry`,
+`far_expiry`, `days_near`, `days_far` (the two end-of-month expirations that
+bracket 30 days); `forward_near` (parity-implied future price); `rate` (DGS1MO,
+decimal); `svix2_near`, `svix2_far` (annualized SVIX^2); `svix2_30`, `svix_30`
+(the 30-day index, interpolated in total variance, in VIX units); `days_used`
+(the expiry the probabilities come from); `p_star_20`, `p_log_20`,
+`p_power_20` (risk-neutral, log-utility per Martin 2017, and power-utility
+gamma=2 per Martin-Shi 2025 probabilities of a 20% drop); `p_star_10`,
+`p_log_10`; `vix` (Cboe VIX close from FRED, when available).
+The file lives in `_output/` locally; on the public monitor it is kept on the
+`monitor-history` branch and gains one row per trading day. It contains no
+settlement prices (those are under the Databento license)."""
 
 
 [charts]

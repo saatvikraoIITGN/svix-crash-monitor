@@ -26,7 +26,6 @@ import sys
 
 sys.path.insert(1, "./src/")
 
-import shutil
 from os import environ
 from pathlib import Path
 
@@ -58,6 +57,7 @@ END_DATE = config("END_DATE")
 
 ## Helpers for handling Jupyter Notebook tasks
 environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
+
 
 # fmt: off
 ## Helper functions for automatic execution of Jupyter notebooks
@@ -226,12 +226,21 @@ def task_latest():
     ## `src/test_dodo.py`.
     return {
         "actions": [
-            # TODO: YOUR CODE HERE
+            "python ./src/settings.py",
+            "python ./src/pull_es_options.py --latest",
+            "python ./src/pull_fred.py",
+            "python ./src/monitor.py",
+            "python ./src/build_page.py",
         ],
         "file_dep": [
-            # TODO: YOUR CODE HERE
+            "./src/pull_es_options.py",
+            "./src/pull_fred.py",
+            "./src/monitor.py",
+            "./src/build_page.py",
+            "./src/monitor_chart.py",
+            *ENGINE,
         ],
-        # TODO: YOUR CODE HERE
+        "uptodate": [False],  # always run when invoked
         "verbosity": 2,
     }
 
@@ -447,8 +456,7 @@ sphinx_targets = [
 def task_build_chartbook_site():
     """Compile Sphinx Docs"""
     notebook_scripts = [
-        Path(notebook_tasks[notebook]["path"])
-        for notebook in notebook_tasks.keys()
+        Path(notebook_tasks[notebook]["path"]) for notebook in notebook_tasks.keys()
     ]
     file_dep = [
         "./README.md",
