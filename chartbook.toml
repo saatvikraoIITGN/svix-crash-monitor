@@ -1,0 +1,15 @@
+[project]
+name = "SVIX Crash Monitor (history)"
+description = "Daily history of Ian Martin's SVIX and the option-implied probability of a crash, computed from CME E-mini S&P 500 option settlements by the HW 3 monitor of saatvikraoIITGN."
+
+[dataframes.svix_monitor_history]
+name = "SVIX monitor history"
+description = "One row per session: 30-day SVIX, the near and far expiries it interpolates, the forward, the risk-free rate, the VIX, and option-implied probabilities of a 10 and 20 percent fall."
+path = "svix_monitor_history.csv"
+date_col = "date"
+docs = """One row per session, appended by the daily workflow on this branch. Derived
+quantities only, no raw option prices. `svix_30` is 30-day SVIX in annualized percent and
+`svix2_30` its square as a decimal; `svix2_near` and `svix2_far` are the two expiries it
+interpolates. `forward_near` is the S&P 500 forward for the near expiry, implied by put-call
+parity. `p_star_*` are risk-neutral and `p_log_*`, `p_power_*` physical probabilities of a
+10 or 20 percent fall within the near expiry, following Martin (2017). `vix` is the Cboe close."""
